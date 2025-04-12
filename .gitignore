@@ -1,0 +1,58 @@
+# CMake build files and folders
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+build/
+_build/
+out/
+CMakeUserPresets.json
+CMakePresets.json
+
+# Ninja build system
+build.ninja
+.ninja_deps
+.ninja_log
+
+# Windows build artifacts
+*.sln
+*.vcxproj*
+*.pdb
+
+# macOS-specific
+.DS_Store
+
+# Qt-related
+moc_*
+ui_*
+qrc_*
+
+# CLion IDE specific
+.idea/
+
+# General temporary files
+*.o
+*.obj
+*.lo
+*.la
+*.al
+*.libs
+*.swp
+*.swo
+*.tmp
+*.log
+*.bak
+*.orig
+*.rej
+*.tags
+*.tag
+
+# Executables
+*.exe
+*.out
+*.app
+*.dSYM/
+
+# Python bytecode (if used in tooling)
+__pycache__/
+*.py[cod]
