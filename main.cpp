@@ -6,8 +6,10 @@
 #include <imgui_impl_opengl3.h>
 #include "nodes/ImageInputNode.hpp"
 #include "nodes/OutputNode.hpp"
+#include "nodes/BrightnessContrastNode.hpp"
 
 static OutputNode outputNode;
+static BrightnessContrastNode bcNode;
 
 #include <GLFW/glfw3.h>
 #include <opencv2/opencv.hpp>
@@ -65,6 +67,10 @@ int main() {
 
         static ImageInputNode imageNode;
         imageNode.Show();
+
+        bcNode.SetInputImage(imageNode.GetImage());
+        bcNode.Show();
+
         outputNode.SetInputImage(imageNode.GetImage());
         outputNode.Show();
 
