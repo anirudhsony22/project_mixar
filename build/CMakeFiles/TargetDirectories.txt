@@ -1,3 +1,0 @@
-/Users/anirudhsony/Downloads/mixar/build/CMakeFiles/NodeImageEditor.dir
-/Users/anirudhsony/Downloads/mixar/build/CMakeFiles/edit_cache.dir
-/Users/anirudhsony/Downloads/mixar/build/CMakeFiles/rebuild_cache.dir
