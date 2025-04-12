@@ -4,6 +4,10 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include "nodes/ImageInputNode.hpp"
+#include "nodes/OutputNode.hpp"
+
+static OutputNode outputNode;
 
 #include <GLFW/glfw3.h>
 #include <opencv2/opencv.hpp>
@@ -45,8 +49,8 @@ int main() {
     // Create graph
     smkflow::Graph graph;
     auto* inputNode = graph.AddNode("Image Input");
-    auto* outputNode = graph.AddNode("Output");
-    outputNode->ConnectTo(inputNode);
+    auto* outputGraphNode = graph.AddNode("Output");
+    outputGraphNode->ConnectTo(inputNode);
 
     // Main loop
     while (!glfwWindowShouldClose(window)) {
@@ -58,6 +62,11 @@ int main() {
 
         smkflow::Theme_Default();
         graph.Show();
+
+        static ImageInputNode imageNode;
+        imageNode.Show();
+        outputNode.SetInputImage(imageNode.GetImage());
+        outputNode.Show();
 
         ImGui::Render();
         int display_w, display_h;

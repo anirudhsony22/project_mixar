@@ -29,6 +29,9 @@ file(GLOB IMGUI_SOURCES
     imgui/backends/imgui_impl_opengl3.cpp
 )
 
+#nodes
+file(GLOB NODE_SOURCES nodes/*.cpp)
+
 # smkflow
 include_directories(smkflow/include)
 file(GLOB SMKFLOW_SOURCES smkflow/src/*.cpp)
@@ -40,7 +43,12 @@ file(GLOB SOURCES
     ${SMKFLOW_SOURCES}
 )
 
-add_executable(NodeImageEditor ${SOURCES})
+add_executable(NodeImageEditor
+  main.cpp
+  ${IMGUI_SOURCES}
+  ${SMKFLOW_SOURCES}
+  ${NODE_SOURCES}
+)
 
 # Link libraries
 target_include_directories(NodeImageEditor PRIVATE ${GLFW_INCLUDE_DIRS})
