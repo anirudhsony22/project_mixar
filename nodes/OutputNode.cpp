@@ -1,4 +1,5 @@
-#include "outputNode.hpp"
+#define GL_SILENCE_DEPRECATION
+#include "OutputNode.hpp"
 #include <opencv2/imgcodecs.hpp>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -13,9 +14,7 @@ void OutputNode::SetInputImage(const cv::Mat& input) {
 }
 
 void OutputNode::Show() {
-    ImGui::Begin("Output Node");
-
-    if (hasImage) {
+    if(ImGui::Begin("Output Node")) {
         ImGui::Text("Preview:");
         ImGui::Image((ImTextureID)(uintptr_t)textureID, ImVec2(128, 128));
 
@@ -65,4 +64,9 @@ void OutputNode::CleanupTexture() {
         glDeleteTextures(1, &textureID);
         textureID = 0;
     }
+}
+
+
+const cv::Mat& OutputNode::GetOutputImage() const {
+    return image;  // Even if not used, it needs to compile
 }

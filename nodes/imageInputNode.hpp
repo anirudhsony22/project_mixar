@@ -4,12 +4,14 @@
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <imgui.h>
+#include "BaseImageNode.hpp"
 
-class ImageInputNode {
+class ImageInputNode : public BaseImageNode {
 public:
-    ImageInputNode();
-    void Show();
-    const cv::Mat& GetImage() const;
+    ImageInputNode() noexcept;
+    void SetInputImage(const cv::Mat& input) override;
+    const cv::Mat& GetOutputImage() const override;
+    void Show() override;
 
 private:
     cv::Mat image;

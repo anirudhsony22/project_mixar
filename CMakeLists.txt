@@ -32,6 +32,9 @@ file(GLOB IMGUI_SOURCES
 #nodes
 file(GLOB NODE_SOURCES nodes/*.cpp)
 
+#graph fucntions
+file(GLOB GRAPH_SORUCES graph/*.cpp)
+
 # smkflow
 include_directories(smkflow/include)
 file(GLOB SMKFLOW_SOURCES smkflow/src/*.cpp)
@@ -45,9 +48,11 @@ file(GLOB SOURCES
 
 add_executable(NodeImageEditor
   main.cpp
+  graph/GraphExecutor.cpp
   ${IMGUI_SOURCES}
   ${SMKFLOW_SOURCES}
   ${NODE_SOURCES}
+  ${GRAPH_SOURCES}
 )
 
 # Link libraries

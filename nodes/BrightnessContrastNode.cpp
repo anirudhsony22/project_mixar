@@ -12,9 +12,7 @@ void BrightnessContrastNode::SetInputImage(const cv::Mat& input) {
 }
 
 void BrightnessContrastNode::Show() {
-    ImGui::Begin("Brightness/Contrast Node");
-
-    if (hasInput) {
+    if (ImGui::Begin("Brightness/Contrast Node")) {
         ImGui::SliderFloat("Brightness", &brightness, -100.0f, 100.0f);
         ImGui::SliderFloat("Contrast", &contrast, 0.0f, 3.0f);
 

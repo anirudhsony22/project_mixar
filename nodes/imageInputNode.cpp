@@ -1,13 +1,12 @@
-#include "imageInputNode.hpp"
+#define GL_SILENCE_DEPRECATION
+#include "ImageInputNode.hpp"
 #include <opencv2/imgcodecs.hpp>
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-ImageInputNode::ImageInputNode() {}
+ImageInputNode::ImageInputNode() noexcept {}
 
-void ImageInputNode::Show() {
-    ImGui::Begin("Image Input Node");
-
+void ImageInputNode::SetInputImage(const cv::Mat& input) {
     static char filepath[512] = "/Users/anirudhsony/Downloads/Untitled.PNG";  // Buffer to hold user path
 
     ImGui::InputText("Image Path", filepath, IM_ARRAYSIZE(filepath));
@@ -23,8 +22,6 @@ void ImageInputNode::Show() {
     } else {
         ImGui::Text("No image loaded");
     }
-
-    ImGui::End();
 }
 
 void ImageInputNode::LoadImage(const std::string& path) {
@@ -33,6 +30,7 @@ void ImageInputNode::LoadImage(const std::string& path) {
         std::cerr << "Failed to load image: " << path << std::endl;
         return;
     }
+    std::cout<<img.channels()<<std::endl;
     if (img.channels() == 4) {
         cv::cvtColor(img, image, cv::COLOR_BGRA2RGBA);
     } else {
@@ -53,7 +51,8 @@ void ImageInputNode::CreateGLTexture() {
     glBindTexture(GL_TEXTURE_2D, textureID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, image.data);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, image.cols, image.rows, 0, format, GL_UNSIGNED_BYTE, image.data);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -64,6 +63,23 @@ void ImageInputNode::CleanupTexture() {
     }
 }
 
-const cv::Mat& ImageInputNode::GetImage() const {
+void ImageInputNode::Show() {
+    if (ImGui::Begin("Image Input")) {
+        static char filepath[512] = "test.jpg";
+        ImGui::InputText("Path", filepath, IM_ARRAYSIZE(filepath));
+
+        if (ImGui::Button("Load")) {
+            LoadImage(filepath);
+        }
+
+        if (hasImage) {
+            ImGui::Text("%dx%d", width, height);
+            ImGui::Image((ImTextureID)(uintptr_t)textureID, ImVec2(128, 128));
+        }
+    }
+    ImGui::End();
+}
+
+const cv::Mat& ImageInputNode::GetOutputImage() const {
     return image;
 }

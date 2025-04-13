@@ -4,8 +4,9 @@
 #include <string>
 #include <imgui.h>
 #include <OpenGL/gl3.h> // For GLuint on macOS
+#include "BaseImageNode.hpp"
 
-class BrightnessContrastNode {
+class BrightnessContrastNode  : public BaseImageNode {
 public:
     BrightnessContrastNode();
     void SetInputImage(const cv::Mat& input);
