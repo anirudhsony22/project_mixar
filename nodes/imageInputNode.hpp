@@ -1,24 +1,30 @@
 #pragma once
-// #include <GL/gl.h>
-#include <OpenGL/gl3.h>
+
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <imgui.h>
-#include "BaseImageNode.hpp"
+#include <OpenGL/gl3.h>
 
-class ImageInputNode : public BaseImageNode {
+#include "BaseImageNode.hpp"
+#include "smkflow/Graph.hpp"  // For smkflow::Node
+
+class ImageInputNode : public smkflow::Node, public BaseImageNode {
 public:
-    ImageInputNode() noexcept;
-    void SetInputImage(const cv::Mat& input) override;
-    const cv::Mat& GetOutputImage() const override;
+    ImageInputNode(const std::string& name);
+
+    // BaseImageNode overrides
+    void SetInputImages(const std::vector<cv::Mat>& images) override;
     void Show() override;
+    const cv::Mat& GetOutputImage() const override;
 
 private:
     cv::Mat image;
-    GLuint textureID = 0;
-    int width = 0, height = 0;
     std::string filename;
+    int width = 0;
+    int height = 0;
     bool hasImage = false;
+
+    GLuint textureID = 0;
 
     void LoadImage(const std::string& path);
     void CreateGLTexture();

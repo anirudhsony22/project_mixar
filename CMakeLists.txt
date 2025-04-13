@@ -37,7 +37,10 @@ file(GLOB GRAPH_SORUCES graph/*.cpp)
 
 # smkflow
 include_directories(smkflow/include)
-file(GLOB SMKFLOW_SOURCES smkflow/src/*.cpp)
+file(GLOB SMKFLOW_SOURCES 
+    smkflow/src/*.cpp
+    smkflow/src/smkflow/Graph.cpp
+)
 
 # Source
 file(GLOB SOURCES

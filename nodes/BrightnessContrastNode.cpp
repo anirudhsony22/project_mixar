@@ -4,39 +4,45 @@
 
 BrightnessContrastNode::BrightnessContrastNode() {}
 
-void BrightnessContrastNode::SetInputImage(const cv::Mat& input) {
-    if (input.empty()) return;
-    input.copyTo(inputImage);
+void BrightnessContrastNode::SetInputImages(const std::vector<cv::Mat>& images) {
+    if (images.empty() || images[0].empty()) return;
+    images[0].copyTo(inputImage);
     hasInput = true;
     needsUpdate = true;
 }
 
 void BrightnessContrastNode::Show() {
     if (ImGui::Begin("Brightness/Contrast Node")) {
-        ImGui::SliderFloat("Brightness", &brightness, -100.0f, 100.0f);
-        ImGui::SliderFloat("Contrast", &contrast, 0.0f, 3.0f);
+        if (hasInput) {
+            ImGui::SliderFloat("Brightness", &brightness, -100.0f, 100.0f);
+            ImGui::SliderFloat("Contrast", &contrast, 0.0f, 3.0f);
 
-        if (ImGui::Button("Update") || ImGui::IsItemDeactivatedAfterEdit()) {
-            needsUpdate = true;
+            if (ImGui::Button("Reset Brightness")) brightness = 0.0f;
+            ImGui::SameLine();
+            if (ImGui::Button("Reset Contrast")) contrast = 1.0f;
+
+            if (ImGui::Button("Update") || ImGui::IsItemDeactivatedAfterEdit()) {
+                needsUpdate = true;
+            }
+
+            if (needsUpdate) {
+                UpdateImage();
+            }
+
+            ImGui::Image((ImTextureID)(uintptr_t)textureID, ImVec2(128, 128));
+        } else {
+            ImGui::Text("No input image.");
         }
-
-        if (needsUpdate) {
-            UpdateImage();
-        }
-
-        ImGui::Image((ImTextureID)(uintptr_t)textureID, ImVec2(128, 128));
-    } else {
-        ImGui::Text("No input image.");
     }
-
     ImGui::End();
 }
 
 void BrightnessContrastNode::UpdateImage() {
     if (!hasInput) return;
 
-    // brightness = beta, contrast = alpha
-    inputImage.convertTo(outputImage, -1, contrast, brightness);
+    // Apply brightness and contrast adjustments
+    inputImage.convertTo(outputImage, -1, contrast, brightness);  // new_image = image*contrast + brightness
+
     CreateGLTexture();
     needsUpdate = false;
 }

@@ -1,16 +1,18 @@
-// BlurNode.hpp
 #pragma once
+
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <imgui.h>
 #include <OpenGL/gl3.h>
+
 #include "BaseImageNode.hpp"
+#include "smkflow/Graph.hpp"  // For smkflow::Node
 
-class BlurNode : public BaseImageNode {
+class BlurNode : public smkflow::Node, public BaseImageNode {
 public:
-    BlurNode();
+    BlurNode(const std::string& name);
 
-    void SetInputImage(const cv::Mat& input) override;
+    void SetInputImages(const std::vector<cv::Mat>& images) override;
     const cv::Mat& GetOutputImage() const override;
     void Show() override;
 

@@ -48,46 +48,40 @@ int main() {
     // Build graph
     smkflow::Graph graph;
 
-    auto* inputGraphNode  = graph.AddNode("Image Input");
-    auto* blurGraphNode   = graph.AddNode("Blur");
-    auto* bcGraphNode     = graph.AddNode("Brightness/Contrast");
-    auto* outputGraphNode = graph.AddNode("Output");
+    auto* inputNode = new ImageInputNode("input");
+    auto* blurNode = new BlurNode("blur");
+    auto* outputNode = new OutputNode("output");
 
-    // Connect graph: Input -> Blur -> Brightness -> Output
-    blurGraphNode->ConnectTo(inputGraphNode);
-    bcGraphNode->ConnectTo(blurGraphNode);
-    outputGraphNode->ConnectTo(bcGraphNode);
+    graph.nodes["input"] = std::shared_ptr<smkflow::Node>(inputNode);
+    graph.nodes["blur"] = std::shared_ptr<smkflow::Node>(blurNode);
+    graph.nodes["output"] = std::shared_ptr<smkflow::Node>(outputNode);
 
-    // Create real nodes
-    static ImageInputNode imageNode;
-    static BlurNode blurNode;
-    static BrightnessContrastNode bcNode;
-    static OutputNode outputNode;
 
-    // Map graph nodes to real image-processing nodes
-    std::unordered_map<smkflow::Node*, BaseImageNode*> imageNodeMap;
-    imageNodeMap[inputGraphNode]  = &imageNode;
-    imageNodeMap[blurGraphNode]   = &blurNode;
-    imageNodeMap[bcGraphNode]     = &bcNode;
-    imageNodeMap[outputGraphNode] = &outputNode;
+    graph.addConnection({"input", 0, "blur", 0});
+    graph.addConnection({"blur", 0, "output", 0});
+
+
+    std::unordered_map<smkflow::Node*, BaseImageNode*> nodeMap;
+    nodeMap[graph.nodes["input"].get()] = inputNode;
+    nodeMap[blurNode] = blurNode;
+    nodeMap[graph.nodes["output"].get()] = outputNode;
+
 
     GraphExecutor executor;
+    // executor.Evaluate(graph, nodeMap);
 
     // Main render loop
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
+
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-
+    
         smkflow::Theme_Default();
-        graph.Show();
-
-        executor.Evaluate(graph, imageNodeMap);
-
-        blurNode.SetInputImage(imageNode.GetOutputImage());
-        // blurNode.Show();
-
+        graph.Show(); // Optional: only needed for visual graph layout
+        executor.Evaluate(graph, nodeMap);
+    
         ImGui::Render();
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
@@ -96,7 +90,7 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);
-    }
+    }    
 
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();

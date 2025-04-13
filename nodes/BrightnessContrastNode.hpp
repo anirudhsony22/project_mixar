@@ -9,7 +9,7 @@
 class BrightnessContrastNode  : public BaseImageNode {
 public:
     BrightnessContrastNode();
-    void SetInputImage(const cv::Mat& input);
+    void SetInputImages(const std::vector<cv::Mat>& images) override;
     void Show();
     const cv::Mat& GetOutputImage() const;
 

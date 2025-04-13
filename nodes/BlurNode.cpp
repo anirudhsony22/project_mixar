@@ -2,13 +2,15 @@
 #include <opencv2/imgproc.hpp>
 #include <iostream>
 
-BlurNode::BlurNode() {}
+BlurNode::BlurNode(const std::string& name)
+    : smkflow::Node(name) {}
 
-void BlurNode::SetInputImage(const cv::Mat& input) {
-    if (input.empty()) return;
-    input.copyTo(inputImage);
-    hasInput = true;
-    needsUpdate = true;
+void BlurNode::SetInputImages(const std::vector<cv::Mat>& images) {
+    if (!images.empty() && !images[0].empty()) {
+        images[0].copyTo(inputImage);
+        hasInput = true;
+        needsUpdate = true;
+    }
 }
 
 void BlurNode::Show() {
@@ -16,7 +18,6 @@ void BlurNode::Show() {
         if (hasInput) {
             ImGui::SliderInt("Radius", &blurRadius, 1, 20);
 
-            // Keep radius odd for Gaussian blur
             if (blurRadius % 2 == 0) blurRadius += 1;
 
             if (ImGui::Button("Update") || ImGui::IsItemDeactivatedAfterEdit()) {

@@ -1,24 +1,29 @@
-// OutputNode.hpp
 #pragma once
+
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <imgui.h>
 #include <OpenGL/gl3.h>
-#include "BaseImageNode.hpp"
 
-class OutputNode : public BaseImageNode {
+#include "BaseImageNode.hpp"
+#include "smkflow/Graph.hpp"
+
+class OutputNode : public smkflow::Node, public BaseImageNode {
 public:
-    OutputNode();
-    void SetInputImage(const cv::Mat& input) override;
-    const cv::Mat& GetOutputImage() const override;
+    OutputNode(const std::string& name);
+    void SetInputImages(const std::vector<cv::Mat>& images) override;
     void Show() override;
+    const cv::Mat& GetOutputImage() const override;
 
 private:
-    cv::Mat image;
+    cv::Mat inputImage;
     GLuint textureID = 0;
-    bool hasImage = false;
-    std::string format = "png";
+    bool hasInput = false;
+    bool needsUpdate = true;
 
+    std::string outputPath;
+    
+    void UpdateImage();
     void CreateGLTexture();
     void CleanupTexture();
     void SaveImage();
