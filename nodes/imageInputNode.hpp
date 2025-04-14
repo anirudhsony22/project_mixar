@@ -25,7 +25,7 @@ class ImageInputNode : public smkflow::Node, public BaseImageNode {
     
         GLuint textureID = 0;
     
-        char filepath[512] = "test.jpg";  // 👈 moved here instead of static
+        char filepath[512] = "/Users/anirudhsony/Downloads/Untitled.PNG";
     
         void LoadImage(const std::string& path);
         void CreateGLTexture();
