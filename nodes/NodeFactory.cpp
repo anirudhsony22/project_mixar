@@ -4,6 +4,8 @@
 #include "BrightnessContrastNode.hpp"
 #include "ColorSplitNode.hpp"
 #include "OutputNode.hpp"
+#include "ThresholdNode.hpp"
+
 
 const float baseY = 50.0f;
 const float ySpacing = 150.0f;
@@ -22,6 +24,8 @@ void ShowAddNodePanel(
     static int bcCount = 1;
     static int outputCount = 1;
     static int csCount = 1;
+    static int thresholdCount = 1;
+
 
     ImGui::Begin("Add Nodes");
 
@@ -64,6 +68,14 @@ void ShowAddNodePanel(
         graph.nodes[name] = cs;
         nodeMap[cs.get()] = cs.get();
     }    
+
+    if (ImGui::Button("Add Threshold Node")) {
+        std::string name = "threshold" + std::to_string(thresholdCount++);
+        auto node = std::make_shared<ThresholdNode>(name);
+        node->position = ImVec2(600, baseY + (thresholdCount - 1) * ySpacing);
+        graph.nodes[name] = node;
+        nodeMap[node.get()] = node.get();
+    }
 
 
     ImGui::End();
