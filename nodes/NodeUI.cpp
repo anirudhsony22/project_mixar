@@ -2,13 +2,16 @@
 #include <imgui.h>
 #include <iostream>
 
+static std::string pendingFromNode;
+static std::string pendingToNode;
+static bool showReplaceDialog = false;
+
 void DrawInputSlot(const std::string& currentNodeId, smkflow::Graph& graph) {
     ImGui::Text("Input Slot:");
     if (ImGui::BeginDragDropTarget()) {
         if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("NODE_OUTPUT")) {
             std::string fromNodeId((const char*)payload->Data);
 
-            // Check if this node already has an input
             bool alreadyConnected = false;
             for (const auto& conn : graph.connections) {
                 if (conn.toNodeId == currentNodeId) {
@@ -18,11 +21,11 @@ void DrawInputSlot(const std::string& currentNodeId, smkflow::Graph& graph) {
             }
 
             if (alreadyConnected) {
-                std::cout << "[Connect] Node '" << currentNodeId
-                          << "' already has an input. Rejecting new connection from '" 
-                          << fromNodeId << "'\n";
-                // Optional: show UI warning
-                ImGui::OpenPopup("ConnectionWarning");
+                // Store temp and trigger popup
+                pendingFromNode = fromNodeId;
+                pendingToNode = currentNodeId;
+                showReplaceDialog = true;
+                ImGui::OpenPopup("Replace Connection?");
             } else {
                 graph.addConnection({fromNodeId, 0, currentNodeId, 0});
                 std::cout << "[Connect] " << fromNodeId << " → " << currentNodeId << std::endl;
@@ -32,9 +35,22 @@ void DrawInputSlot(const std::string& currentNodeId, smkflow::Graph& graph) {
     }
 
     // Optional: Popup warning UI
-    if (ImGui::BeginPopup("ConnectionWarning")) {
-        ImGui::Text("This node only accepts one input.");
-        if (ImGui::Button("OK")) ImGui::CloseCurrentPopup();
+    if (ImGui::BeginPopupModal("Replace Connection?", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text("This node already has an input.\nReplace existing connection?");
+        ImGui::Separator();
+
+        if (ImGui::Button("Yes", ImVec2(100, 0))) {
+            graph.removeConnectionForTarget(pendingToNode);
+            graph.addConnection({pendingFromNode, 0, pendingToNode, 0});
+            showReplaceDialog = false;
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::SameLine();
+        if (ImGui::Button("No", ImVec2(100, 0))) {
+            showReplaceDialog = false;
+            ImGui::CloseCurrentPopup();
+        }
         ImGui::EndPopup();
     }
 }
