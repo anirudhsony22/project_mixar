@@ -5,6 +5,7 @@
 #include "ColorSplitNode.hpp"
 #include "OutputNode.hpp"
 #include "ThresholdNode.hpp"
+#include "EdgeDetectionNode.hpp"
 
 
 const float baseY = 50.0f;
@@ -25,6 +26,7 @@ void ShowAddNodePanel(
     static int outputCount = 1;
     static int csCount = 1;
     static int thresholdCount = 1;
+    static int edgeCount = 1;
 
 
     ImGui::Begin("Add Nodes");
@@ -77,6 +79,13 @@ void ShowAddNodePanel(
         nodeMap[node.get()] = node.get();
     }
 
+    if (ImGui::Button("Add Edge Detection Node")) {
+        std::string name = "edge" + std::to_string(edgeCount++);
+        auto node = std::make_shared<EdgeDetectionNode>(name);
+        node->position = ImVec2(600, baseY + (edgeCount - 1) * ySpacing);
+        graph.nodes[name] = node;
+        nodeMap[node.get()] = node.get();
+    }
 
     ImGui::End();
 }
