@@ -1,16 +1,13 @@
 #pragma once
-
 #include <opencv2/opencv.hpp>
-#include <string>
 #include <imgui.h>
 #include <OpenGL/gl3.h>
-
 #include "BaseImageNode.hpp"
 #include "smkflow/Graph.hpp"
 
-class BlurNode : public smkflow::Node, public BaseImageNode {
+class ColorSplitNode : public smkflow::Node, public BaseImageNode {
 public:
-    BlurNode(const std::string& name);
+    ColorSplitNode(const std::string& name);
 
     void SetInputImages(const std::vector<cv::Mat>& images) override;
     const cv::Mat& GetOutputImage(int slot) const override;
@@ -18,15 +15,14 @@ public:
 
 private:
     cv::Mat inputImage;
-    cv::Mat outputImage;
-
-    int blurRadius = 3;
+    cv::Mat channelR, channelG, channelB;
+    cv::Mat outputImage; // not used directly but required
     bool hasInput = false;
     bool needsUpdate = true;
 
-    GLuint textureID = 0;
+    GLuint texR = 0, texG = 0, texB = 0;
 
-    void UpdateImage();
-    void CreateGLTexture();
-    void CleanupTexture();
+    void UpdateImages();
+    void CreateGLTexture(GLuint& texID, const cv::Mat& channel, char tint);
+    void CleanupTextures();
 };

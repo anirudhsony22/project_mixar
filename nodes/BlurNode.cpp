@@ -43,7 +43,7 @@ BlurNode::BlurNode(const std::string& name)
             ImGui::Text("No input image.");
         }
 
-        DrawOutputSlot(name);
+        DrawOutputSlot(name,0);
     }
     ImGui::End();
 }
@@ -57,7 +57,7 @@ void BlurNode::UpdateImage() {
     needsUpdate = false;
 }
 
-const cv::Mat& BlurNode::GetOutputImage() const {
+const cv::Mat& BlurNode::GetOutputImage(int slot = 0) const {
     return outputImage;
 }
 

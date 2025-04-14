@@ -3,7 +3,6 @@
 #include "BlurNode.hpp"
 #include "BrightnessContrastNode.hpp"
 #include "ColorSplitNode.hpp"
-#include "ColorSplitNode.hpp"
 #include "OutputNode.hpp"
 
 const float baseY = 50.0f;
@@ -22,6 +21,7 @@ void ShowAddNodePanel(
     static int blurCount = 1;
     static int bcCount = 1;
     static int outputCount = 1;
+    static int csCount = 1;
 
     ImGui::Begin("Add Nodes");
 
@@ -56,6 +56,15 @@ void ShowAddNodePanel(
         graph.nodes[name] = output;
         nodeMap[output.get()] = output.get();
     }
+
+    if (ImGui::Button("Add Color Split Node")) {
+        std::string name = "colorsplit" + std::to_string(csCount++);
+        auto cs = std::make_shared<ColorSplitNode>(name);
+        cs->position = ImVec2(300, baseY + (csCount - 1) * ySpacing);
+        graph.nodes[name] = cs;
+        nodeMap[cs.get()] = cs.get();
+    }    
+
 
     ImGui::End();
 }

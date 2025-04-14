@@ -48,7 +48,7 @@ void BrightnessContrastNode::Show(smkflow::Graph& graph) {
             ImGui::Text("No input image.");
         }
 
-        DrawOutputSlot(name);
+        DrawOutputSlot(name,0);
     }
     ImGui::End();
 }
@@ -64,7 +64,7 @@ void BrightnessContrastNode::UpdateImage() {
     needsUpdate = false;
 }
 
-const cv::Mat& BrightnessContrastNode::GetOutputImage() const {
+const cv::Mat& BrightnessContrastNode::GetOutputImage(int slot = 0) const {
     return outputImage;
 }
 

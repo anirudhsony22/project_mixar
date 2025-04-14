@@ -13,7 +13,7 @@ class ImageInputNode : public smkflow::Node, public BaseImageNode {
         ImageInputNode(const std::string& name);
     
         void SetInputImages(const std::vector<cv::Mat>& images) override;
-        const cv::Mat& GetOutputImage() const override;
+        const cv::Mat& GetOutputImage(int slot=0) const override;
         void Show(smkflow::Graph& graph) override;
     
     private:

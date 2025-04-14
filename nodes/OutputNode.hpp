@@ -13,7 +13,7 @@ public:
     OutputNode(const std::string& name);
     void SetInputImages(const std::vector<cv::Mat>& images) override;
     void Show(smkflow::Graph& graph) override;
-    const cv::Mat& GetOutputImage() const override;
+    const cv::Mat& GetOutputImage(int slot = 0) const override;
 
 private:
     cv::Mat inputImage;

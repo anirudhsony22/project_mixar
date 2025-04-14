@@ -23,13 +23,14 @@ void GraphExecutor::Evaluate(
         std::vector<cv::Mat> inputs;
 
         bool hasValidInput = false;
-        for (auto* input : node->inputs) {
-
-            if (input && nodeMap.count(input)) {
-                inputs.push_back(nodeMap[input]->GetOutputImage());
-                hasValidInput = true;
+        for (const auto& conn : graph.connections) {
+            if (conn.toNodeId == node->name) {
+                auto* fromNode = graph.nodes[conn.fromNodeId].get();
+                if (nodeMap.count(fromNode)) {
+                    inputs.push_back(nodeMap[fromNode]->GetOutputImage(conn.fromSlot));
+                }
             }
-        }
+        }        
 
 
         current->SetInputImages(inputs);

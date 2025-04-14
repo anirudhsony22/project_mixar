@@ -4,7 +4,7 @@
 #include "smkflow/Graph.hpp"
 
 void DrawInputSlot(const std::string& currentNodeName, smkflow::Graph& graph);
-void DrawOutputSlot(const std::string& currentNodeName);
+void DrawOutputSlot(const std::string& currentNodeName, int slot);
 
 inline void EnforceSingleInput(smkflow::Graph& graph, const std::string& toNodeId, const std::string& newFromNodeId) {
     // Remove all existing connections into toNodeId

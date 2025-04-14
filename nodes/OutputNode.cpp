@@ -7,6 +7,7 @@
 
 #include "OutputNode.hpp"
 #include "NodeUI.hpp"
+#include "ImageUtils.hpp"
 
 OutputNode::OutputNode(const std::string& name)
     : smkflow::Node(name) {}
@@ -17,7 +18,6 @@ void OutputNode::SetInputImages(const std::vector<cv::Mat>& images) {
         hasInput = true;
         needsUpdate = true;
     } else {
-        // Clear on disconnect
         inputImage.release();
         hasInput = false;
         needsUpdate = false;
@@ -54,7 +54,7 @@ void OutputNode::UpdateImage() {
     needsUpdate = false;
 }
 
-const cv::Mat& OutputNode::GetOutputImage() const {
+const cv::Mat& OutputNode::GetOutputImage(int) const {
     return inputImage;
 }
 
@@ -66,11 +66,17 @@ void OutputNode::CreateGLTexture() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    GLenum format = inputImage.channels() == 4 ? GL_RGBA : GL_RGB;
-    glTexImage2D(GL_TEXTURE_2D, 0, format, inputImage.cols, inputImage.rows, 0,
-                 format, GL_UNSIGNED_BYTE, inputImage.data);
+    cv::Mat display = EnsureRGB(inputImage);
+
+    GLenum format = display.channels() == 4 ? GL_RGBA : GL_RGB;
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, display.cols, display.rows, 0,
+                 format, GL_UNSIGNED_BYTE, display.data);
+
     glBindTexture(GL_TEXTURE_2D, 0);
 }
+
 
 void OutputNode::CleanupTexture() {
     if (textureID) {

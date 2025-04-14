@@ -31,7 +31,7 @@ void ImageInputNode::Show(smkflow::Graph& graph) {
             ImGui::Text("No image loaded.");
         }
 
-        DrawOutputSlot(name); // optional
+        DrawOutputSlot(name, 0); // optional
     }
     ImGui::End();
 }
@@ -79,6 +79,6 @@ void ImageInputNode::CleanupTexture() {
     }
 }
 
-const cv::Mat& ImageInputNode::GetOutputImage() const {
+const cv::Mat& ImageInputNode::GetOutputImage(int slot) const {
     return image;
 }
