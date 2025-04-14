@@ -2,6 +2,8 @@
 #include "ImageInputNode.hpp"
 #include "BlurNode.hpp"
 #include "BrightnessContrastNode.hpp"
+#include "ColorSplitNode.hpp"
+#include "ColorSplitNode.hpp"
 #include "OutputNode.hpp"
 
 const float baseY = 50.0f;

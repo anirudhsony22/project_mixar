@@ -31,6 +31,7 @@ void GraphExecutor::Evaluate(
             }
         }
 
+
         current->SetInputImages(inputs);
         current->Show(graph); // Renders node & computes output
     }
@@ -50,12 +51,13 @@ std::vector<smkflow::Node*> GraphExecutor::TopologicalSort(
     }
 
     // Build graph edges
-    for (const auto& [node, _] : nodeMap) {
-        for (auto* input : node->inputs) {
-            if (nodeMap.count(input)) {
-                adj[input].push_back(node);
-                inDegree[node]++;
-            }
+    for (const auto& conn : graph.connections) {
+        smkflow::Node* from = graph.nodes.at(conn.fromNodeId).get();
+        smkflow::Node* to = graph.nodes.at(conn.toNodeId).get();
+
+        if (nodeMap.count(from) && nodeMap.count(to)) {
+            adj[from].push_back(to);
+            inDegree[to]++;
         }
     }
 
@@ -87,3 +89,4 @@ std::vector<smkflow::Node*> GraphExecutor::TopologicalSort(
 
     return result;
 }
+
