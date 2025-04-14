@@ -5,26 +5,22 @@
 #include "BaseImageNode.hpp"
 #include "smkflow/Graph.hpp"
 
-class ThresholdNode : public smkflow::Node, public BaseImageNode {
+class BlendNode : public smkflow::Node, public BaseImageNode {
 public:
-    ThresholdNode(const std::string& name);
+    BlendNode(const std::string& name);
 
     void SetInputImages(const std::vector<cv::Mat>& images) override;
     const cv::Mat& GetOutputImage(int slot = 0) const override;
     void Show(smkflow::Graph& graph) override;
 
 private:
-    cv::Mat inputImage;
+    std::vector<cv::Mat> inputImages;
     cv::Mat outputImage;
     bool hasInput = false;
     bool needsUpdate = true;
 
-    float histogram[256] = {0}; // Grayscale histogram
-    bool histogramReady = false;
-    int histScaleMode = 0; // 0 = linear, 1 = log
-    int thresholdValue = 127;
-    int maxValue = 255;
-    int method = 0; // 0=Binary, 1=Adaptive Mean, 2=Adaptive Gaussian, 3=Otsu
+    int blendMode = 0; // 0 = Normal, 1 = Multiply, 2 = Screen, 3 = Overlay, 4 = Difference
+    float blendFactor = 0.5f;
 
     GLuint textureID = 0;
 

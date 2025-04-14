@@ -6,6 +6,7 @@
 #include "OutputNode.hpp"
 #include "ThresholdNode.hpp"
 #include "EdgeDetectionNode.hpp"
+#include "BlendNode.hpp"
 
 
 const float baseY = 50.0f;
@@ -27,6 +28,8 @@ void ShowAddNodePanel(
     static int csCount = 1;
     static int thresholdCount = 1;
     static int edgeCount = 1;
+    static int blendCount = 1;
+
 
 
     ImGui::Begin("Add Nodes");
@@ -83,6 +86,14 @@ void ShowAddNodePanel(
         std::string name = "edge" + std::to_string(edgeCount++);
         auto node = std::make_shared<EdgeDetectionNode>(name);
         node->position = ImVec2(600, baseY + (edgeCount - 1) * ySpacing);
+        graph.nodes[name] = node;
+        nodeMap[node.get()] = node.get();
+    }
+
+    if (ImGui::Button("Add Blend Node")) {
+        std::string name = "blend" + std::to_string(blendCount++);
+        auto node = std::make_shared<BlendNode>(name);
+        node->position = ImVec2(800, baseY + (blendCount - 1) * ySpacing);
         graph.nodes[name] = node;
         nodeMap[node.get()] = node.get();
     }

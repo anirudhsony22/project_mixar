@@ -42,6 +42,19 @@ void ThresholdNode::Show(smkflow::Graph& graph) {
             if (needsUpdate) UpdateImage();
 
             ImGui::Image((ImTextureID)(uintptr_t)textureID, ImVec2(128, 128));
+
+            const char* scaleModes[] = { "Linear", "Log Scale" };
+            ImGui::Combo("Histogram Scale", &histScaleMode, scaleModes, IM_ARRAYSIZE(scaleModes));
+            if (histogramReady) {
+                ImGui::Text("Histogram");
+                ImGui::PlotLines("##hist", histogram, 256, 0, nullptr, 0.0f, 1.0f, ImVec2(256, 100));
+            
+                ImVec2 pos = ImGui::GetCursorScreenPos();
+                float x = pos.x + (thresholdValue / 255.0f) * 256.0f;
+                ImDrawList* drawList = ImGui::GetWindowDrawList();
+                drawList->AddLine(ImVec2(x, pos.y - 100), ImVec2(x, pos.y), IM_COL32(255, 0, 0, 255), 2.0f);
+            }
+
         } else {
             ImGui::Text("No input image.");
         }
@@ -58,6 +71,30 @@ void ThresholdNode::UpdateImage() {
     else
         gray = inputImage;
 
+    // === Compute Histogram ===
+    int histSize = 256;
+    float range[] = { 0, 256 };
+    const float* histRange = { range };
+
+    cv::Mat hist;
+    cv::calcHist(&gray, 1, 0, cv::Mat(), hist, 1, &histSize, &histRange);
+
+    double maxVal;
+    cv::minMaxLoc(hist, 0, &maxVal);
+
+    for (int i = 0; i < histSize; ++i) {
+        float value = hist.at<float>(i);
+    
+        if (histScaleMode == 1) { // Log scale
+            histogram[i] = static_cast<float>(std::log1p(value) / std::log1p(maxVal));
+        } else { // Linear
+            histogram[i] = static_cast<float>(value / (maxVal > 0 ? maxVal : 1));
+        }
+    }
+
+    histogramReady = true;
+
+    // === Thresholding ===
     switch (method) {
         case 0: // Binary
             cv::threshold(gray, outputImage, thresholdValue, maxValue, cv::THRESH_BINARY);
@@ -78,6 +115,7 @@ void ThresholdNode::UpdateImage() {
     CreateGLTexture();
     needsUpdate = false;
 }
+
 
 void ThresholdNode::CreateGLTexture() {
     CleanupTexture();

@@ -23,24 +23,33 @@ void DrawInputSlot(const std::string& currentNodeId, smkflow::Graph& graph) {
                 fromSlot = std::stoi(data.substr(delim + 2));
             }
 
-            bool alreadyConnected = false;
-            for (const auto& conn : graph.connections) {
-                if (conn.toNodeId == currentNodeId) {
-                    alreadyConnected = true;
-                    break;
+            bool isMultiInputNode = currentNodeId.find("blend") == 0;
+
+            if (!isMultiInputNode) {
+                // Enforce single input behavior
+                bool alreadyConnected = false;
+                for (const auto& conn : graph.connections) {
+                    if (conn.toNodeId == currentNodeId) {
+                        alreadyConnected = true;
+                        break;
+                    }
+                }
+
+                if (alreadyConnected) {
+                    pendingFromNode = fromNodeId;
+                    pendingFromSlot = fromSlot;
+                    pendingToNode = currentNodeId;
+                    showReplaceDialog = true;
+                    ImGui::OpenPopup("Replace Connection?");
+                    ImGui::EndDragDropTarget();
+                    return;
                 }
             }
 
-            if (alreadyConnected) {
-                pendingFromNode = fromNodeId;
-                pendingFromSlot = fromSlot;
-                pendingToNode = currentNodeId;
-                showReplaceDialog = true;
-                ImGui::OpenPopup("Replace Connection?");
-            } else {
-                graph.addConnection({fromNodeId, fromSlot, currentNodeId, 0});
-                std::cout << "[Connect] " << fromNodeId << " [slot " << fromSlot << "] → " << currentNodeId << std::endl;
-            }
+            // Either multi-input node or no previous connection
+            graph.addConnection({fromNodeId, fromSlot, currentNodeId, 0});
+            std::cout << "[Connect] " << fromNodeId << " [slot " << fromSlot << "] → " << currentNodeId << std::endl;
+
         }
         ImGui::EndDragDropTarget();
     }
@@ -64,6 +73,7 @@ void DrawInputSlot(const std::string& currentNodeId, smkflow::Graph& graph) {
         ImGui::EndPopup();
     }
 }
+
 
 void DrawOutputSlot(const std::string& nodeId, int slot = 0) {
     ImGui::Button(("Output##" + nodeId + std::to_string(slot)).c_str());
