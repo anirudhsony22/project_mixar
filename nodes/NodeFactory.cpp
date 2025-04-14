@@ -8,6 +8,7 @@
 #include "EdgeDetectionNode.hpp"
 #include "BlendNode.hpp"
 #include "ConvolutionNode.hpp"
+#include "NoiseNode.hpp"
 
 
 const float baseY = 50.0f;
@@ -31,7 +32,7 @@ void ShowAddNodePanel(
     static int edgeCount = 1;
     static int blendCount = 1;
     static int convCount = 1;
-
+    static int noiseCount = 1;
 
 
     ImGui::Begin("Add Nodes");
@@ -107,6 +108,14 @@ void ShowAddNodePanel(
         graph.nodes[name] = node;
         nodeMap[node.get()] = node.get();
     }
+
+    if (ImGui::Button("Add Noise Node")) {
+        std::string name = "noise" + std::to_string(noiseCount++);
+        auto node = std::make_shared<NoiseNode>(name);
+        node->position = ImVec2(1000, baseY + (noiseCount - 1) * ySpacing);
+        graph.nodes[name] = node;
+        nodeMap[node.get()] = node.get();
+    }    
 
     ImGui::End();
 }
