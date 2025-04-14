@@ -5,9 +5,9 @@
 #include "BaseImageNode.hpp"
 #include "smkflow/Graph.hpp"
 
-class ThresholdNode : public smkflow::Node, public BaseImageNode {
+class ConvolutionNode : public smkflow::Node, public BaseImageNode {
 public:
-    ThresholdNode(const std::string& name);
+    ConvolutionNode(const std::string& name);
 
     void SetInputImages(const std::vector<cv::Mat>& images) override;
     const cv::Mat& GetOutputImage(int slot = 0) const override;
@@ -19,17 +19,26 @@ private:
     bool hasInput = false;
     bool needsUpdate = true;
 
-    float histogram[256] = {0}; // Grayscale histogram
-    bool histogramReady = false;
-    int histScaleMode = 0; // 0 = linear, 1 = log
-    int thresholdValue = 127;
-    int otsuComputedValue = -1;
-    int maxValue = 255;
-    int method = 0; // 0=Binary, 1=Adaptive Mean, 2=Adaptive Gaussian, 3=Otsu
+    bool use5x5 = false;
+    float kernel5x5[5][5] = {
+        {0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0},
+        {0, 0, 1, 0, 0},
+        {0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0}
+    };
+    float kernel3x3[3][3] = {
+        { 0, -1,  0 },
+        { -1, 5, -1 },
+        { 0, -1,  0 }
+    };
+    int selectedPreset = 0;
+    bool normalize = false;
 
     GLuint textureID = 0;
 
     void UpdateImage();
     void CreateGLTexture();
     void CleanupTexture();
+    void ApplyPreset(int presetIndex);
 };

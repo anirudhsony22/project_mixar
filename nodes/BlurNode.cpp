@@ -9,36 +9,48 @@
 BlurNode::BlurNode(const std::string& name)
     : smkflow::Node(name) {}
 
-    void BlurNode::SetInputImages(const std::vector<cv::Mat>& images) {
-        if (!images.empty() && !images[0].empty()) {
-            images[0].copyTo(inputImage);
-            hasInput = true;
-            needsUpdate = true;
-        } else {
-            // Clear state on disconnect
-            inputImage.release();
-            outputImage.release();
-            hasInput = false;
-            needsUpdate = false;
-            CleanupTexture();
-        }
+void BlurNode::SetInputImages(const std::vector<cv::Mat>& images) {
+    if (!images.empty() && !images[0].empty()) {
+        images[0].copyTo(inputImage);
+        hasInput = true;
+        needsUpdate = true;
+    } else {
+        // Clear state on disconnect
+        inputImage.release();
+        outputImage.release();
+        hasInput = false;
+        needsUpdate = false;
+        CleanupTexture();
     }
+}
     
-    void BlurNode::Show(smkflow::Graph& graph) {
+void BlurNode::Show(smkflow::Graph& graph) {
     if (ImGui::Begin(("Blur Node: " + name).c_str())) {
         DrawInputSlot(name, graph);
 
         if (hasInput) {
+            const char* blurModes[] = { "Gaussian", "Box (Uniform)", "Directional" };
+            ImGui::Combo("Blur Type", &blurType, blurModes, IM_ARRAYSIZE(blurModes));
             ImGui::SliderInt("Radius", &blurRadius, 1, 20);
             if (blurRadius % 2 == 0) blurRadius += 1;
+
+            if (blurType == 2) {
+                const char* directions[] = { "Horizontal", "Vertical" };
+                ImGui::Combo("Direction", &direction, directions, IM_ARRAYSIZE(directions));
+            }
 
             if (ImGui::Button("Update") || ImGui::IsItemDeactivatedAfterEdit()) {
                 needsUpdate = true;
             }
 
-            if (needsUpdate) UpdateImage();
+            if (needsUpdate) {
+                UpdateImage();
+            }
 
-            ImGui::Image((ImTextureID)(uintptr_t)textureID, ImVec2(128, 128));
+            if (!outputImage.empty()) {
+                ImGui::Image((ImTextureID)(uintptr_t)textureID, ImVec2(128, 128));
+            }
+
         } else {
             ImGui::Text("No input image.");
         }
@@ -52,7 +64,20 @@ BlurNode::BlurNode(const std::string& name)
 void BlurNode::UpdateImage() {
     if (!hasInput) return;
 
-    cv::GaussianBlur(inputImage, outputImage, cv::Size(blurRadius, blurRadius), 0);
+    switch (blurType) {
+        case 0: // Gaussian
+            cv::GaussianBlur(inputImage, outputImage, cv::Size(blurRadius, blurRadius), 0);
+            break;
+        case 1: // Box (Uniform)
+            cv::blur(inputImage, outputImage, cv::Size(blurRadius, blurRadius));
+            break;
+        case 2: { // Directional
+            int kx = direction == 0 ? blurRadius : 1;
+            int ky = direction == 1 ? blurRadius : 1;
+            cv::blur(inputImage, outputImage, cv::Size(kx, ky));
+            break;
+        }
+    }
     CreateGLTexture();
     needsUpdate = false;
 }

@@ -7,6 +7,7 @@
 #include "ThresholdNode.hpp"
 #include "EdgeDetectionNode.hpp"
 #include "BlendNode.hpp"
+#include "ConvolutionNode.hpp"
 
 
 const float baseY = 50.0f;
@@ -29,6 +30,7 @@ void ShowAddNodePanel(
     static int thresholdCount = 1;
     static int edgeCount = 1;
     static int blendCount = 1;
+    static int convCount = 1;
 
 
 
@@ -94,6 +96,14 @@ void ShowAddNodePanel(
         std::string name = "blend" + std::to_string(blendCount++);
         auto node = std::make_shared<BlendNode>(name);
         node->position = ImVec2(800, baseY + (blendCount - 1) * ySpacing);
+        graph.nodes[name] = node;
+        nodeMap[node.get()] = node.get();
+    }
+
+    if (ImGui::Button("Add Convolution Node")) {
+        std::string name = "conv" + std::to_string(convCount++);
+        auto node = std::make_shared<ConvolutionNode>(name);
+        node->position = ImVec2(900, baseY + (convCount - 1) * ySpacing);
         graph.nodes[name] = node;
         nodeMap[node.get()] = node.get();
     }

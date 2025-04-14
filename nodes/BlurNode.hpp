@@ -23,6 +23,8 @@ private:
     int blurRadius = 3;
     bool hasInput = false;
     bool needsUpdate = true;
+    int blurType = 0;
+    int direction = 0;
 
     GLuint textureID = 0;
 

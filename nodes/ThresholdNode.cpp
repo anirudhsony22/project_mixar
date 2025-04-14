@@ -50,9 +50,18 @@ void ThresholdNode::Show(smkflow::Graph& graph) {
                 ImGui::PlotLines("##hist", histogram, 256, 0, nullptr, 0.0f, 1.0f, ImVec2(256, 100));
             
                 ImVec2 pos = ImGui::GetCursorScreenPos();
-                float x = pos.x + (thresholdValue / 255.0f) * 256.0f;
                 ImDrawList* drawList = ImGui::GetWindowDrawList();
-                drawList->AddLine(ImVec2(x, pos.y - 100), ImVec2(x, pos.y), IM_COL32(255, 0, 0, 255), 2.0f);
+            
+                // Red threshold line (user input)
+                float xUser = pos.x + (thresholdValue / 255.0f) * 256.0f;
+                drawList->AddLine(ImVec2(xUser, pos.y - 100), ImVec2(xUser, pos.y), IM_COL32(255, 0, 0, 255), 2.0f);
+            
+                // Yellow Otsu line
+                if (method == 3 && otsuComputedValue >= 0) {
+                    float xOtsu = pos.x + (otsuComputedValue / 255.0f) * 256.0f;
+                    drawList->AddLine(ImVec2(xOtsu, pos.y - 100), ImVec2(xOtsu, pos.y), IM_COL32(255, 255, 0, 255), 2.0f);
+                    ImGui::Text("Otsu Threshold: %d", otsuComputedValue);
+                }
             }
 
         } else {
@@ -108,7 +117,10 @@ void ThresholdNode::UpdateImage() {
                                   cv::THRESH_BINARY, 11, 2);
             break;
         case 3: // Otsu
-            cv::threshold(gray, outputImage, 0, maxValue, cv::THRESH_BINARY | cv::THRESH_OTSU);
+            otsuComputedValue = static_cast<int>(
+                cv::threshold(gray, outputImage, 0, maxValue, cv::THRESH_BINARY | cv::THRESH_OTSU)
+            );
+        
             break;
     }
 
