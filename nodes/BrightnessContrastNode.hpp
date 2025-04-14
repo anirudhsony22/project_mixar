@@ -4,14 +4,17 @@
 #include <string>
 #include <imgui.h>
 #include <OpenGL/gl3.h> // For GLuint on macOS
-#include "BaseImageNode.hpp"
 
-class BrightnessContrastNode  : public BaseImageNode {
+#include "BaseImageNode.hpp"
+#include "smkflow/Graph.hpp"
+
+class BrightnessContrastNode : public smkflow::Node, public BaseImageNode {
 public:
-    BrightnessContrastNode();
+    BrightnessContrastNode(const std::string& name);
+
     void SetInputImages(const std::vector<cv::Mat>& images) override;
-    void Show();
-    const cv::Mat& GetOutputImage() const;
+    void Show(smkflow::Graph& graph) override;
+    const cv::Mat& GetOutputImage() const override;
 
 private:
     cv::Mat inputImage;

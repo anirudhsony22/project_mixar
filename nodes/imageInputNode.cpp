@@ -1,10 +1,12 @@
 #define GL_SILENCE_DEPRECATION
-#include "ImageInputNode.hpp"
+#include <iostream>
 
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include <GLFW/glfw3.h>
-#include <iostream>
+
+#include "ImageInputNode.hpp"
+#include "NodeUI.hpp"
 
 ImageInputNode::ImageInputNode(const std::string& name)
     : smkflow::Node(name) {}
@@ -13,9 +15,9 @@ void ImageInputNode::SetInputImages(const std::vector<cv::Mat>&) {
     // Input nodes do not receive upstream images — do nothing.
 }
 
-void ImageInputNode::Show() {
+void ImageInputNode::Show(smkflow::Graph& graph) {
     if (ImGui::Begin("Image Input")) {
-        static char filepath[512] = "test.jpg";
+        static char filepath[512] = "/Users/anirudhsony/Downloads/Untitled.PNG";
         ImGui::InputText("Path", filepath, IM_ARRAYSIZE(filepath));
 
         if (ImGui::Button("Load")) {
@@ -29,6 +31,7 @@ void ImageInputNode::Show() {
         } else {
             ImGui::Text("No image loaded.");
         }
+        DrawOutputSlot(name);
     }
     ImGui::End();
 }

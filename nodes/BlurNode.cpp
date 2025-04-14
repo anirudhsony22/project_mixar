@@ -1,40 +1,53 @@
-#include "BlurNode.hpp"
-#include <opencv2/imgproc.hpp>
 #include <iostream>
+
+#include <opencv2/imgproc.hpp>
+
+#include "BlurNode.hpp"
+#include "NodeUI.hpp"
+
 
 BlurNode::BlurNode(const std::string& name)
     : smkflow::Node(name) {}
 
-void BlurNode::SetInputImages(const std::vector<cv::Mat>& images) {
-    if (!images.empty() && !images[0].empty()) {
-        images[0].copyTo(inputImage);
-        hasInput = true;
-        needsUpdate = true;
+    void BlurNode::SetInputImages(const std::vector<cv::Mat>& images) {
+        if (!images.empty() && !images[0].empty()) {
+            images[0].copyTo(inputImage);
+            hasInput = true;
+            needsUpdate = true;
+        } else {
+            // Clear state on disconnect
+            inputImage.release();
+            outputImage.release();
+            hasInput = false;
+            needsUpdate = false;
+            CleanupTexture();
+        }
     }
-}
+    
+    void BlurNode::Show(smkflow::Graph& graph) {
+    if (ImGui::Begin(("Blur Node: " + name).c_str())) {
+        DrawInputSlot(name, graph);
 
-void BlurNode::Show() {
-    if (ImGui::Begin("Blur Node")) {
         if (hasInput) {
             ImGui::SliderInt("Radius", &blurRadius, 1, 20);
-
             if (blurRadius % 2 == 0) blurRadius += 1;
 
             if (ImGui::Button("Update") || ImGui::IsItemDeactivatedAfterEdit()) {
                 needsUpdate = true;
             }
 
-            if (needsUpdate) {
-                UpdateImage();
-            }
+            if (needsUpdate) UpdateImage();
 
             ImGui::Image((ImTextureID)(uintptr_t)textureID, ImVec2(128, 128));
         } else {
             ImGui::Text("No input image.");
         }
+
+        DrawOutputSlot(name);
     }
     ImGui::End();
 }
+
 
 void BlurNode::UpdateImage() {
     if (!hasInput) return;

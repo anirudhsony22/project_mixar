@@ -1,21 +1,35 @@
 #define GL_SILENCE_DEPRECATION
-#include "OutputNode.hpp"
+
+#include <iostream>
+
 #include <opencv2/imgcodecs.hpp>
 #include <GLFW/glfw3.h>
-#include <iostream>
+
+#include "OutputNode.hpp"
+#include "NodeUI.hpp"
 
 OutputNode::OutputNode(const std::string& name)
     : smkflow::Node(name) {}
 
 void OutputNode::SetInputImages(const std::vector<cv::Mat>& images) {
-    if (images.empty() || images[0].empty()) return;
-    images[0].copyTo(inputImage);
-    hasInput = true;
-    needsUpdate = true;
+    if (!images.empty() && !images[0].empty()) {
+        images[0].copyTo(inputImage);
+        hasInput = true;
+        needsUpdate = true;
+    } else {
+        // Clear on disconnect
+        inputImage.release();
+        hasInput = false;
+        needsUpdate = false;
+        CleanupTexture();
+    }
 }
+    
 
-void OutputNode::Show() {
+void OutputNode::Show(smkflow::Graph& graph) {
     if (ImGui::Begin("Output Node")) {
+        DrawInputSlot(name, graph);
+
         if (hasInput) {
             if (needsUpdate) UpdateImage();
 

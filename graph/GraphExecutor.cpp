@@ -14,18 +14,32 @@ void GraphExecutor::Evaluate(
 
     for (auto* node : sortedNodes) {
         if (!nodeMap.count(node)) continue;
+
+        // std::cout << "\n[Evaluate] Processing node: " << node->name << std::endl;
+
         BaseImageNode* current = nodeMap[node];
 
         // Gather all inputs
         std::vector<cv::Mat> inputs;
+
+        bool hasValidInput = false;
         for (auto* input : node->inputs) {
-            if (nodeMap.count(input)) {
+            // if (input) {
+            //     std::cout << "  ↳ input from: " << input->name << std::endl;
+            // } else {
+            //     std::cout << "  ↳ input: nullptr" << std::endl;
+            // }
+
+            if (input && nodeMap.count(input)) {
                 inputs.push_back(nodeMap[input]->GetOutputImage());
+                hasValidInput = true;
             }
         }
 
-        current->SetInputImages(inputs); // Optional: You may want to support multi-input
-        current->Show(); // Renders node & computes output
+        // std::cout << "  Total valid inputs: " << inputs.size() << std::endl;
+
+        current->SetInputImages(inputs);
+        current->Show(graph); // Renders node & computes output
     }
 }
 

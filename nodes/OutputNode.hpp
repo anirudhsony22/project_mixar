@@ -12,7 +12,7 @@ class OutputNode : public smkflow::Node, public BaseImageNode {
 public:
     OutputNode(const std::string& name);
     void SetInputImages(const std::vector<cv::Mat>& images) override;
-    void Show() override;
+    void Show(smkflow::Graph& graph) override;
     const cv::Mat& GetOutputImage() const override;
 
 private:

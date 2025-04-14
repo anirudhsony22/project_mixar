@@ -50,20 +50,19 @@ int main() {
 
     auto* inputNode = new ImageInputNode("input");
     auto* blurNode = new BlurNode("blur");
+    auto* bcNode = new BrightnessContrastNode("brightness");
     auto* outputNode = new OutputNode("output");
 
     graph.nodes["input"] = std::shared_ptr<smkflow::Node>(inputNode);
     graph.nodes["blur"] = std::shared_ptr<smkflow::Node>(blurNode);
+    graph.nodes["brightness"] = std::shared_ptr<smkflow::Node>(bcNode);
     graph.nodes["output"] = std::shared_ptr<smkflow::Node>(outputNode);
-
-
-    graph.addConnection({"input", 0, "blur", 0});
-    graph.addConnection({"blur", 0, "output", 0});
 
 
     std::unordered_map<smkflow::Node*, BaseImageNode*> nodeMap;
     nodeMap[graph.nodes["input"].get()] = inputNode;
-    nodeMap[blurNode] = blurNode;
+    nodeMap[graph.nodes["blur"].get()] = bcNode;
+    nodeMap[graph.nodes["brightness"].get()] = bcNode;
     nodeMap[graph.nodes["output"].get()] = outputNode;
 
 

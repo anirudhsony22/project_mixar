@@ -3,6 +3,10 @@
 #include <opencv2/opencv.hpp>
 #include <vector>
 
+namespace smkflow {
+    class Graph;
+}
+
 class BaseImageNode {
 public:
     virtual ~BaseImageNode() = default;
@@ -14,5 +18,5 @@ public:
     virtual const cv::Mat& GetOutputImage() const = 0;
 
     // Renders the ImGui interface and processes image if needed
-    virtual void Show() = 0;
+    virtual void Show(smkflow::Graph& graph) = 0;
 };

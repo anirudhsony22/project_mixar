@@ -1,18 +1,34 @@
-#include "BrightnessContrastNode.hpp"
-#include <opencv2/imgproc.hpp>
 #include <iostream>
 
-BrightnessContrastNode::BrightnessContrastNode() {}
+#include <opencv2/imgproc.hpp>
+
+#include "BrightnessContrastNode.hpp"
+#include "NodeUI.hpp"
+
+
+BrightnessContrastNode::BrightnessContrastNode(const std::string& name)
+    : smkflow::Node(name) {}
 
 void BrightnessContrastNode::SetInputImages(const std::vector<cv::Mat>& images) {
-    if (images.empty() || images[0].empty()) return;
-    images[0].copyTo(inputImage);
-    hasInput = true;
-    needsUpdate = true;
+    if (!images.empty() && !images[0].empty()) {
+        images[0].copyTo(inputImage);
+        hasInput = true;
+        needsUpdate = true;
+    } else {
+        // Clear on disconnect
+        inputImage.release();
+        outputImage.release();
+        hasInput = false;
+        needsUpdate = false;
+        CleanupTexture();
+    }
 }
 
-void BrightnessContrastNode::Show() {
-    if (ImGui::Begin("Brightness/Contrast Node")) {
+
+void BrightnessContrastNode::Show(smkflow::Graph& graph) {
+    if (ImGui::Begin(("Brightness/Contrast Node: " + name).c_str())) {
+        DrawInputSlot(name, graph);
+
         if (hasInput) {
             ImGui::SliderFloat("Brightness", &brightness, -100.0f, 100.0f);
             ImGui::SliderFloat("Contrast", &contrast, 0.0f, 3.0f);
@@ -25,17 +41,18 @@ void BrightnessContrastNode::Show() {
                 needsUpdate = true;
             }
 
-            if (needsUpdate) {
-                UpdateImage();
-            }
+            if (needsUpdate) UpdateImage();
 
             ImGui::Image((ImTextureID)(uintptr_t)textureID, ImVec2(128, 128));
         } else {
             ImGui::Text("No input image.");
         }
+
+        DrawOutputSlot(name);
     }
     ImGui::End();
 }
+
 
 void BrightnessContrastNode::UpdateImage() {
     if (!hasInput) return;

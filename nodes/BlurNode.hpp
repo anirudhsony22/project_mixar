@@ -6,7 +6,7 @@
 #include <OpenGL/gl3.h>
 
 #include "BaseImageNode.hpp"
-#include "smkflow/Graph.hpp"  // For smkflow::Node
+#include "smkflow/Graph.hpp"
 
 class BlurNode : public smkflow::Node, public BaseImageNode {
 public:
@@ -14,7 +14,7 @@ public:
 
     void SetInputImages(const std::vector<cv::Mat>& images) override;
     const cv::Mat& GetOutputImage() const override;
-    void Show() override;
+    void Show(smkflow::Graph& graph) override;
 
 private:
     cv::Mat inputImage;
