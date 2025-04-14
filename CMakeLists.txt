@@ -33,7 +33,7 @@ file(GLOB IMGUI_SOURCES
 file(GLOB NODE_SOURCES nodes/*.cpp)
 
 #graph fucntions
-file(GLOB GRAPH_SORUCES graph/*.cpp)
+file(GLOB GRAPH_SOURCES graph/*.cpp)
 
 # smkflow
 include_directories(smkflow/include)

@@ -16,8 +16,7 @@ void ImageInputNode::SetInputImages(const std::vector<cv::Mat>&) {
 }
 
 void ImageInputNode::Show(smkflow::Graph& graph) {
-    if (ImGui::Begin("Image Input")) {
-        static char filepath[512] = "/Users/anirudhsony/Downloads/Untitled.PNG";
+    if (ImGui::Begin(("Image Input: " + name).c_str())) {
         ImGui::InputText("Path", filepath, IM_ARRAYSIZE(filepath));
 
         if (ImGui::Button("Load")) {
@@ -31,7 +30,8 @@ void ImageInputNode::Show(smkflow::Graph& graph) {
         } else {
             ImGui::Text("No image loaded.");
         }
-        DrawOutputSlot(name);
+
+        DrawOutputSlot(name); // optional
     }
     ImGui::End();
 }

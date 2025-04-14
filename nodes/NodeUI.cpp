@@ -2,32 +2,40 @@
 #include <imgui.h>
 #include <iostream>
 
-void DrawInputSlot(const std::string& currentNodeName, smkflow::Graph& graph) {
+void DrawInputSlot(const std::string& currentNodeId, smkflow::Graph& graph) {
     ImGui::Text("Input Slot:");
-
-    // Right-click menu
-    if (ImGui::BeginPopupContextItem(("##input_slot_" + currentNodeName).c_str())) {
-        // Check if this node has an input connection
-        for (const auto& conn : graph.connections) {
-            if (conn.toNodeId == currentNodeName) {
-                if (ImGui::MenuItem(("Disconnect from " + conn.fromNodeId).c_str())) {
-
-                    // Remove connection
-                    graph.removeConnection(conn.fromNodeId, conn.toNodeId);
-                    break;
-                }
-            }
-        }
-        ImGui::EndPopup();
-    }
-
     if (ImGui::BeginDragDropTarget()) {
         if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("NODE_OUTPUT")) {
             std::string fromNodeId((const char*)payload->Data);
 
-            graph.addConnection({fromNodeId, 0, currentNodeName, 0});
+            // Check if this node already has an input
+            bool alreadyConnected = false;
+            for (const auto& conn : graph.connections) {
+                if (conn.toNodeId == currentNodeId) {
+                    alreadyConnected = true;
+                    break;
+                }
+            }
+
+            if (alreadyConnected) {
+                std::cout << "[Connect] Node '" << currentNodeId
+                          << "' already has an input. Rejecting new connection from '" 
+                          << fromNodeId << "'\n";
+                // Optional: show UI warning
+                ImGui::OpenPopup("ConnectionWarning");
+            } else {
+                graph.addConnection({fromNodeId, 0, currentNodeId, 0});
+                std::cout << "[Connect] " << fromNodeId << " → " << currentNodeId << std::endl;
+            }
         }
         ImGui::EndDragDropTarget();
+    }
+
+    // Optional: Popup warning UI
+    if (ImGui::BeginPopup("ConnectionWarning")) {
+        ImGui::Text("This node only accepts one input.");
+        if (ImGui::Button("OK")) ImGui::CloseCurrentPopup();
+        ImGui::EndPopup();
     }
 }
 

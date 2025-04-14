@@ -1,4 +1,5 @@
 #include "GraphExecutor.hpp"
+#include "../nodes/NodeFactory.hpp"
 #include <unordered_set>
 #include <functional>
 
@@ -6,6 +7,7 @@ void GraphExecutor::Evaluate(
     smkflow::Graph& graph,
     std::unordered_map<smkflow::Node*, BaseImageNode*>& nodeMap
 ) {
+    ShowAddNodePanel(graph, nodeMap);
     auto sortedNodes = TopologicalSort(graph, nodeMap);
     if (sortedNodes.empty()) {
         std::cerr << "[GraphExecutor] Evaluation aborted due to cycle." << std::endl;
@@ -15,8 +17,6 @@ void GraphExecutor::Evaluate(
     for (auto* node : sortedNodes) {
         if (!nodeMap.count(node)) continue;
 
-        // std::cout << "\n[Evaluate] Processing node: " << node->name << std::endl;
-
         BaseImageNode* current = nodeMap[node];
 
         // Gather all inputs
@@ -24,19 +24,12 @@ void GraphExecutor::Evaluate(
 
         bool hasValidInput = false;
         for (auto* input : node->inputs) {
-            // if (input) {
-            //     std::cout << "  ↳ input from: " << input->name << std::endl;
-            // } else {
-            //     std::cout << "  ↳ input: nullptr" << std::endl;
-            // }
 
             if (input && nodeMap.count(input)) {
                 inputs.push_back(nodeMap[input]->GetOutputImage());
                 hasValidInput = true;
             }
         }
-
-        // std::cout << "  Total valid inputs: " << inputs.size() << std::endl;
 
         current->SetInputImages(inputs);
         current->Show(graph); // Renders node & computes output

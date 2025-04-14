@@ -11,6 +11,7 @@
 #include "nodes/BrightnessContrastNode.hpp"
 #include "nodes/BlurNode.hpp"
 #include "graph/GraphExecutor.hpp"
+#include "nodes/NodeFactory.hpp"
 
 #include <GLFW/glfw3.h>
 #include <opencv2/opencv.hpp>
@@ -22,6 +23,12 @@ void glfw_error_callback(int error, const char* description) {
 }
 
 int main() {
+
+    int inputNodeCounter = 1;
+    int blurNodeCounter = 1;
+    int brightnessNodeCounter = 1;
+    int outputNodeCounter = 1;
+
     // Setup GLFW
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit()) return -1;
@@ -48,22 +55,22 @@ int main() {
     // Build graph
     smkflow::Graph graph;
 
-    auto* inputNode = new ImageInputNode("input");
-    auto* blurNode = new BlurNode("blur");
-    auto* bcNode = new BrightnessContrastNode("brightness");
-    auto* outputNode = new OutputNode("output");
+    auto inputNode = std::make_shared<ImageInputNode>("input");
+    auto blurNode = std::make_shared<BlurNode>("blur");
+    auto bcNode = std::make_shared<BrightnessContrastNode>("brightness");
+    auto outputNode = std::make_shared<OutputNode>("output");
 
-    graph.nodes["input"] = std::shared_ptr<smkflow::Node>(inputNode);
-    graph.nodes["blur"] = std::shared_ptr<smkflow::Node>(blurNode);
-    graph.nodes["brightness"] = std::shared_ptr<smkflow::Node>(bcNode);
-    graph.nodes["output"] = std::shared_ptr<smkflow::Node>(outputNode);
+    graph.nodes["input"] = inputNode;
+    graph.nodes["blur"] = blurNode;
+    graph.nodes["brightness"] = bcNode;
+    graph.nodes["output"] = outputNode;
 
 
     std::unordered_map<smkflow::Node*, BaseImageNode*> nodeMap;
-    nodeMap[graph.nodes["input"].get()] = inputNode;
-    nodeMap[graph.nodes["blur"].get()] = bcNode;
-    nodeMap[graph.nodes["brightness"].get()] = bcNode;
-    nodeMap[graph.nodes["output"].get()] = outputNode;
+    nodeMap[inputNode.get()] = inputNode.get();
+    nodeMap[blurNode.get()] = blurNode.get();
+    nodeMap[bcNode.get()] = bcNode.get();
+    nodeMap[outputNode.get()] = outputNode.get();
 
 
     GraphExecutor executor;
