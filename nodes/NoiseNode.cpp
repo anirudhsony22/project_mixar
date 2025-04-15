@@ -1,6 +1,7 @@
 #include "NoiseNode.hpp"
 #include "NodeUI.hpp"
 #include "ImageUtils.hpp"
+#include "SlotUtils.hpp"
 #include <random>
 #include <iostream>
 
@@ -11,14 +12,18 @@ const cv::Mat& NoiseNode::GetOutputImage(int) const {
     return outputImage;
 }
 
+
 void NoiseNode::Show(smkflow::Graph& graph) {
+    ImGui::SetNextWindowPos(position, ImGuiCond_FirstUseEver);
     if (ImGui::Begin(("Noise Node: " + name).c_str())) {
+        windowPos = ImGui::GetWindowPos();
+        windowSize = ImGui::GetWindowSize();
 
         if (displaceOutput) {
-            DrawInputSlot(name, graph);
+            DrawInputPort(*this, 0, graph);
             ImGui::SliderFloat("Displacement Strength", &displacementStrength, 1.0f, 100.0f);
         }
-        
+
         ImGui::InputInt("Width", &width);
         ImGui::InputInt("Height", &height);
 
@@ -28,7 +33,6 @@ void NoiseNode::Show(smkflow::Graph& graph) {
         ImGui::SliderInt("Octaves", &octaves, 1, 6);
         ImGui::SliderFloat("Persistence", &persistence, 0.1f, 1.0f);
         ImGui::Checkbox("Displace Output", &displaceOutput);
-
 
         if (noiseType == 1) {
             ImGui::SliderInt("Grid Size", &gridSize, 2, 128);
@@ -46,10 +50,11 @@ void NoiseNode::Show(smkflow::Graph& graph) {
             ImGui::Image((ImTextureID)(uintptr_t)textureID, ImVec2(128, 128));
         }
 
-        DrawOutputSlot(name, 0);
+        DrawOutputPort(*this, 0);  // always has an output
     }
     ImGui::End();
 }
+
 
 void NoiseNode::GenerateNoise() {
     // Step 1: Generate base noise (1-channel grayscale)
@@ -115,6 +120,7 @@ void NoiseNode::GenerateNoise() {
     needsUpdate = false;
 }
 
+
 void NoiseNode::CreateGLTexture() {
     CleanupTexture();
 
@@ -130,12 +136,14 @@ void NoiseNode::CreateGLTexture() {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+
 void NoiseNode::CleanupTexture() {
     if (textureID) {
         glDeleteTextures(1, &textureID);
         textureID = 0;
     }
 }
+
 
 void NoiseNode::SetInputImages(const std::vector<cv::Mat>& images) {
     if (!images.empty() && !images[0].empty()) {

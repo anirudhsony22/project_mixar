@@ -54,11 +54,11 @@ int main() {
     smkflow::Graph graph;
 
     auto inputNode = std::make_shared<ImageInputNode>("input");
-    inputNode->position = ImVec2(100, 100);  // ✅ Set position
+    inputNode->position = ImVec2(100, 100);
 
     std::unordered_map<smkflow::Node*, BaseImageNode*> nodeMap;
-    graph.nodes["input"] = inputNode;       // ✅ Add to graph
-    nodeMap[inputNode.get()] = inputNode.get(); // ✅ Add to map
+    graph.nodes["input"] = inputNode;
+    nodeMap[inputNode.get()] = inputNode.get();
 
 
 

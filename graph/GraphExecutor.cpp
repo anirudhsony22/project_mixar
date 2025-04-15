@@ -106,3 +106,13 @@ std::vector<smkflow::Node*> GraphExecutor::TopologicalSort(
     return result;
 }
 
+
+void RemoveNodeFromMap(
+    std::unordered_map<smkflow::Node*, BaseImageNode*>& nodeMap,
+    smkflow::Node* target
+) {
+    if (nodeMap.count(target)) {
+        std::cout << "[Executor] Removing from nodeMap: " << target->name << std::endl;
+        nodeMap.erase(target);
+    }
+}

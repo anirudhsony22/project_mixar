@@ -1,6 +1,7 @@
 #include "ThresholdNode.hpp"
 #include "NodeUI.hpp"
 #include "ImageUtils.hpp"
+#include "SlotUtils.hpp"
 #include <iostream>
 
 ThresholdNode::ThresholdNode(const std::string& name)
@@ -20,13 +21,20 @@ void ThresholdNode::SetInputImages(const std::vector<cv::Mat>& images) {
     }
 }
 
+
 const cv::Mat& ThresholdNode::GetOutputImage(int) const {
     return outputImage;
 }
 
+
 void ThresholdNode::Show(smkflow::Graph& graph) {
+    ImGui::SetNextWindowPos(position, ImGuiCond_FirstUseEver);
     if (ImGui::Begin(("Threshold: " + name).c_str())) {
-        DrawInputSlot(name, graph);
+        windowPos = ImGui::GetWindowPos();
+        windowSize = ImGui::GetWindowSize();
+
+        DrawInputPort(*this, 0, graph);
+        DrawOutputPort(*this, 0);
 
         if (hasInput) {
             ImGui::SliderInt("Threshold", &thresholdValue, 0, 255);
@@ -45,18 +53,17 @@ void ThresholdNode::Show(smkflow::Graph& graph) {
 
             const char* scaleModes[] = { "Linear", "Log Scale" };
             ImGui::Combo("Histogram Scale", &histScaleMode, scaleModes, IM_ARRAYSIZE(scaleModes));
+
             if (histogramReady) {
                 ImGui::Text("Histogram");
                 ImGui::PlotLines("##hist", histogram, 256, 0, nullptr, 0.0f, 1.0f, ImVec2(256, 100));
-            
+
                 ImVec2 pos = ImGui::GetCursorScreenPos();
                 ImDrawList* drawList = ImGui::GetWindowDrawList();
-            
-                // Red threshold line (user input)
+
                 float xUser = pos.x + (thresholdValue / 255.0f) * 256.0f;
                 drawList->AddLine(ImVec2(xUser, pos.y - 100), ImVec2(xUser, pos.y), IM_COL32(255, 0, 0, 255), 2.0f);
-            
-                // Yellow Otsu line
+
                 if (method == 3 && otsuComputedValue >= 0) {
                     float xOtsu = pos.x + (otsuComputedValue / 255.0f) * 256.0f;
                     drawList->AddLine(ImVec2(xOtsu, pos.y - 100), ImVec2(xOtsu, pos.y), IM_COL32(255, 255, 0, 255), 2.0f);
@@ -67,11 +74,10 @@ void ThresholdNode::Show(smkflow::Graph& graph) {
         } else {
             ImGui::Text("No input image.");
         }
-
-        DrawOutputSlot(name, 0);
     }
     ImGui::End();
 }
+
 
 void ThresholdNode::UpdateImage() {
     cv::Mat gray;
@@ -146,9 +152,11 @@ void ThresholdNode::CreateGLTexture() {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+
 void ThresholdNode::CleanupTexture() {
     if (textureID) {
         glDeleteTextures(1, &textureID);
         textureID = 0;
     }
 }
+

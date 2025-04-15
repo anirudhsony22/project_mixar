@@ -4,6 +4,7 @@
 
 #include "BrightnessContrastNode.hpp"
 #include "NodeUI.hpp"
+#include "SlotUtils.hpp"
 
 
 BrightnessContrastNode::BrightnessContrastNode(const std::string& name)
@@ -26,8 +27,14 @@ void BrightnessContrastNode::SetInputImages(const std::vector<cv::Mat>& images) 
 
 
 void BrightnessContrastNode::Show(smkflow::Graph& graph) {
+    ImGui::SetNextWindowPos(position, ImGuiCond_FirstUseEver);
     if (ImGui::Begin(("Brightness/Contrast Node: " + name).c_str())) {
-        DrawInputSlot(name, graph);
+        windowPos = ImGui::GetWindowPos();
+        windowSize = ImGui::GetWindowSize();
+
+        // Port interaction
+        DrawInputPort(*this, 0, graph);
+        DrawOutputPort(*this, 0);
 
         if (hasInput) {
             ImGui::SliderFloat("Brightness", &brightness, -100.0f, 100.0f);
@@ -47,8 +54,6 @@ void BrightnessContrastNode::Show(smkflow::Graph& graph) {
         } else {
             ImGui::Text("No input image.");
         }
-
-        DrawOutputSlot(name,0);
     }
     ImGui::End();
 }
@@ -64,9 +69,11 @@ void BrightnessContrastNode::UpdateImage() {
     needsUpdate = false;
 }
 
+
 const cv::Mat& BrightnessContrastNode::GetOutputImage(int slot = 0) const {
     return outputImage;
 }
+
 
 void BrightnessContrastNode::CreateGLTexture() {
     CleanupTexture();
@@ -81,6 +88,7 @@ void BrightnessContrastNode::CreateGLTexture() {
                  format, GL_UNSIGNED_BYTE, outputImage.data);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
+
 
 void BrightnessContrastNode::CleanupTexture() {
     if (textureID) {

@@ -7,6 +7,7 @@
 
 #include "ImageInputNode.hpp"
 #include "NodeUI.hpp"
+#include "SlotUtils.hpp"
 
 ImageInputNode::ImageInputNode(const std::string& name)
     : smkflow::Node(name) {}
@@ -15,8 +16,16 @@ void ImageInputNode::SetInputImages(const std::vector<cv::Mat>&) {
     // Input nodes do not receive upstream images — do nothing.
 }
 
+
 void ImageInputNode::Show(smkflow::Graph& graph) {
+    ImGui::SetNextWindowPos(position, ImGuiCond_FirstUseEver);
     if (ImGui::Begin(("Image Input: " + name).c_str())) {
+        windowPos = ImGui::GetWindowPos();
+        windowSize = ImGui::GetWindowSize();
+
+        // Output port only
+        DrawOutputPort(*this, 0);
+
         ImGui::InputText("Path", filepath, IM_ARRAYSIZE(filepath));
 
         if (ImGui::Button("Load")) {
@@ -30,11 +39,10 @@ void ImageInputNode::Show(smkflow::Graph& graph) {
         } else {
             ImGui::Text("No image loaded.");
         }
-
-        DrawOutputSlot(name, 0); // optional
     }
     ImGui::End();
 }
+
 
 void ImageInputNode::LoadImage(const std::string& path) {
     cv::Mat img = cv::imread(path);
@@ -58,6 +66,7 @@ void ImageInputNode::LoadImage(const std::string& path) {
     CreateGLTexture();
 }
 
+
 void ImageInputNode::CreateGLTexture() {
     CleanupTexture();
 
@@ -72,12 +81,14 @@ void ImageInputNode::CreateGLTexture() {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+
 void ImageInputNode::CleanupTexture() {
     if (textureID) {
         glDeleteTextures(1, &textureID);
         textureID = 0;
     }
 }
+
 
 const cv::Mat& ImageInputNode::GetOutputImage(int slot) const {
     return image;

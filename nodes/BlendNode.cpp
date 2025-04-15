@@ -1,6 +1,7 @@
 #include "BlendNode.hpp"
 #include "NodeUI.hpp"
 #include "ImageUtils.hpp"
+#include "SlotUtils.hpp"
 #include <iostream>
 
 BlendNode::BlendNode(const std::string& name)
@@ -12,14 +13,26 @@ void BlendNode::SetInputImages(const std::vector<cv::Mat>& images) {
     needsUpdate = hasInput;
 }
 
+
 const cv::Mat& BlendNode::GetOutputImage(int) const {
     return outputImage;
 }
 
-void BlendNode::Show(smkflow::Graph& graph) {
-    if (ImGui::Begin(("Blend: " + name).c_str())) {
-        DrawInputSlot(name, graph);
 
+void BlendNode::Show(smkflow::Graph& graph) {
+    ImGui::SetNextWindowPos(position, ImGuiCond_FirstUseEver);
+
+    if (ImGui::Begin(("Blend: " + name).c_str())) {
+        // Track window position & size for edge layout
+        windowPos = ImGui::GetWindowPos();
+        windowSize = ImGui::GetWindowSize();
+
+        // === Port bubbles ===
+        DrawInputPort(*this, 0, graph);
+        DrawInputPort(*this, 1, graph);
+        DrawOutputPort(*this, 0);
+
+        // === Node controls ===
         const char* modes[] = { "Normal", "Multiply", "Screen", "Overlay", "Difference" };
         ImGui::Combo("Mode", &blendMode, modes, IM_ARRAYSIZE(modes));
 
@@ -40,11 +53,11 @@ void BlendNode::Show(smkflow::Graph& graph) {
         } else {
             ImGui::Text("Waiting for two valid inputs.");
         }
-
-        DrawOutputSlot(name, 0);
     }
+
     ImGui::End();
 }
+
 
 void BlendNode::UpdateImage() {
     if (inputImages.size() != 2 || inputImages[0].empty() || inputImages[1].empty()) return;
@@ -86,6 +99,7 @@ void BlendNode::UpdateImage() {
     needsUpdate = false;
 }
 
+
 void BlendNode::CreateGLTexture() {
     CleanupTexture();
 
@@ -102,6 +116,7 @@ void BlendNode::CreateGLTexture() {
 
     glBindTexture(GL_TEXTURE_2D, 0);
 }
+
 
 void BlendNode::CleanupTexture() {
     if (textureID) {

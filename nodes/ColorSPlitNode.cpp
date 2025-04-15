@@ -2,6 +2,7 @@
 
 #include "ColorSplitNode.hpp"
 #include "NodeUI.hpp"
+#include "SlotUtils.hpp"
 
 ColorSplitNode::ColorSplitNode(const std::string& name)
     : smkflow::Node(name) {}
@@ -20,6 +21,7 @@ void ColorSplitNode::SetInputImages(const std::vector<cv::Mat>& images) {
     }
 }
 
+
 const cv::Mat& ColorSplitNode::GetOutputImage(int slot) const {
     if (slot == 1) return channelG;
     if (slot == 2) return channelB;
@@ -28,35 +30,47 @@ const cv::Mat& ColorSplitNode::GetOutputImage(int slot) const {
 
 
 void ColorSplitNode::Show(smkflow::Graph& graph) {
+    ImGui::SetNextWindowPos(position, ImGuiCond_FirstUseEver);
     if (ImGui::Begin(("Color Split: " + name).c_str())) {
-        DrawInputSlot(name, graph);
+        windowPos = ImGui::GetWindowPos();
+        windowSize = ImGui::GetWindowSize();
+
+        // Input port
+        DrawInputPort(*this, 0, graph);
 
         if (hasInput) {
             if (needsUpdate) UpdateImages();
 
+            // R Channel
             ImGui::Text("R Channel");
             ImVec2 rPos = ImGui::GetCursorScreenPos();
             ImGui::Image((ImTextureID)(uintptr_t)texR, ImVec2(100, 100));
-            DrawOutputSlot(name, 0);
+            DrawOutputPort(*this, 0);
+            ImGui::Dummy(ImVec2(0, 120));
 
+            ImGui::Separator();
+
+            // G Channel
             ImGui::Text("G Channel");
             ImVec2 gPos = ImGui::GetCursorScreenPos();
             ImGui::Image((ImTextureID)(uintptr_t)texG, ImVec2(100, 100));
-            DrawOutputSlot(name, 1);
+            DrawOutputPort(*this, 1);
+            ImGui::Dummy(ImVec2(0, 240));
 
+            ImGui::Separator();
+
+            // B Channel
             ImGui::Text("B Channel");
             ImVec2 bPos = ImGui::GetCursorScreenPos();
             ImGui::Image((ImTextureID)(uintptr_t)texB, ImVec2(100, 100));
-            DrawOutputSlot(name, 2);
-
+            DrawOutputPort(*this, 2);
         } else {
             ImGui::Text("No input image.");
         }
-
-        DrawOutputSlot(name, 0);
     }
     ImGui::End();
 }
+
 
 void ColorSplitNode::UpdateImages() {
     std::vector<cv::Mat> channels;
@@ -74,6 +88,7 @@ void ColorSplitNode::UpdateImages() {
 
     needsUpdate = false;
 }
+
 
 void ColorSplitNode::CreateGLTexture(GLuint& texID, const cv::Mat& channel, char tint) {
     if (texID) glDeleteTextures(1, &texID);

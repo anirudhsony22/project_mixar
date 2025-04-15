@@ -4,6 +4,7 @@
 
 #include "BlurNode.hpp"
 #include "NodeUI.hpp"
+#include "SlotUtils.hpp"
 
 
 BlurNode::BlurNode(const std::string& name)
@@ -23,11 +24,19 @@ void BlurNode::SetInputImages(const std::vector<cv::Mat>& images) {
         CleanupTexture();
     }
 }
-    
-void BlurNode::Show(smkflow::Graph& graph) {
-    if (ImGui::Begin(("Blur Node: " + name).c_str())) {
-        DrawInputSlot(name, graph);
 
+
+void BlurNode::Show(smkflow::Graph& graph) {
+    ImGui::SetNextWindowPos(position, ImGuiCond_FirstUseEver);
+    if (ImGui::Begin(("Blur Node: " + name).c_str())) {
+        windowPos = ImGui::GetWindowPos();
+        windowSize = ImGui::GetWindowSize();
+
+        // === Port interactions ===
+        DrawInputPort(*this, 0, graph);
+        DrawOutputPort(*this, 0);
+
+        // === Blur settings ===
         if (hasInput) {
             const char* blurModes[] = { "Gaussian", "Box (Uniform)", "Directional" };
             ImGui::Combo("Blur Type", &blurType, blurModes, IM_ARRAYSIZE(blurModes));
@@ -50,12 +59,9 @@ void BlurNode::Show(smkflow::Graph& graph) {
             if (!outputImage.empty()) {
                 ImGui::Image((ImTextureID)(uintptr_t)textureID, ImVec2(128, 128));
             }
-
         } else {
             ImGui::Text("No input image.");
         }
-
-        DrawOutputSlot(name,0);
     }
     ImGui::End();
 }
@@ -82,9 +88,11 @@ void BlurNode::UpdateImage() {
     needsUpdate = false;
 }
 
+
 const cv::Mat& BlurNode::GetOutputImage(int slot = 0) const {
     return outputImage;
 }
+
 
 void BlurNode::CreateGLTexture() {
     CleanupTexture();
@@ -99,6 +107,7 @@ void BlurNode::CreateGLTexture() {
                  format, GL_UNSIGNED_BYTE, outputImage.data);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
+
 
 void BlurNode::CleanupTexture() {
     if (textureID) {

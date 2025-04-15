@@ -8,6 +8,7 @@
 #include "OutputNode.hpp"
 #include "NodeUI.hpp"
 #include "ImageUtils.hpp"
+#include "SlotUtils.hpp"
 
 OutputNode::OutputNode(const std::string& name)
     : smkflow::Node(name) {}
@@ -27,8 +28,12 @@ void OutputNode::SetInputImages(const std::vector<cv::Mat>& images) {
     
 
 void OutputNode::Show(smkflow::Graph& graph) {
+    ImGui::SetNextWindowPos(position, ImGuiCond_FirstUseEver);
     if (ImGui::Begin("Output Node")) {
-        DrawInputSlot(name, graph);
+        windowPos = ImGui::GetWindowPos();
+        windowSize = ImGui::GetWindowSize();
+
+        DrawInputPort(*this, 0, graph);
 
         if (hasInput) {
             if (needsUpdate) UpdateImage();
@@ -49,14 +54,17 @@ void OutputNode::Show(smkflow::Graph& graph) {
     ImGui::End();
 }
 
+
 void OutputNode::UpdateImage() {
     CreateGLTexture();
     needsUpdate = false;
 }
 
+
 const cv::Mat& OutputNode::GetOutputImage(int) const {
     return inputImage;
 }
+
 
 void OutputNode::CreateGLTexture() {
     CleanupTexture();
@@ -84,6 +92,7 @@ void OutputNode::CleanupTexture() {
         textureID = 0;
     }
 }
+
 
 void OutputNode::SaveImage() {
     if (!inputImage.empty() && !outputPath.empty()) {

@@ -1,6 +1,7 @@
 #include "EdgeDetectionNode.hpp"
 #include "NodeUI.hpp"
 #include "ImageUtils.hpp"
+#include "SlotUtils.hpp"
 #include <iostream>
 
 EdgeDetectionNode::EdgeDetectionNode(const std::string& name)
@@ -20,13 +21,21 @@ void EdgeDetectionNode::SetInputImages(const std::vector<cv::Mat>& images) {
     }
 }
 
+
 const cv::Mat& EdgeDetectionNode::GetOutputImage(int) const {
     return outputImage;
 }
 
+
 void EdgeDetectionNode::Show(smkflow::Graph& graph) {
+    ImGui::SetNextWindowPos(position, ImGuiCond_FirstUseEver);
     if (ImGui::Begin(("Edge Detection: " + name).c_str())) {
-        DrawInputSlot(name, graph);
+        windowPos = ImGui::GetWindowPos();
+        windowSize = ImGui::GetWindowSize();
+
+        // Port interactions
+        DrawInputPort(*this, 0, graph);
+        DrawOutputPort(*this, 0);
 
         if (hasInput) {
             const char* methods[] = { "Sobel", "Canny" };
@@ -52,11 +61,10 @@ void EdgeDetectionNode::Show(smkflow::Graph& graph) {
         } else {
             ImGui::Text("No input image.");
         }
-
-        DrawOutputSlot(name, 0);
     }
     ImGui::End();
 }
+
 
 void EdgeDetectionNode::UpdateImage() {
     cv::Mat gray;
@@ -66,6 +74,10 @@ void EdgeDetectionNode::UpdateImage() {
         gray = inputImage;
 
     if (method == 0) { // Sobel
+        if (sobelDx==0 && sobelDy==0){
+            ImGui::TextColored(ImVec4(1, 0.5f, 0.5f, 1), "⚠️ dx and dy can't both be 0");
+            return;
+        }
         cv::Sobel(gray, outputImage, CV_8U, sobelDx, sobelDy, sobelKernel);
     } else { // Canny
         cv::Canny(gray, outputImage, cannyThreshold1, cannyThreshold2);
@@ -74,6 +86,7 @@ void EdgeDetectionNode::UpdateImage() {
     CreateGLTexture();
     needsUpdate = false;
 }
+
 
 void EdgeDetectionNode::CreateGLTexture() {
     CleanupTexture();
@@ -91,6 +104,7 @@ void EdgeDetectionNode::CreateGLTexture() {
 
     glBindTexture(GL_TEXTURE_2D, 0);
 }
+
 
 void EdgeDetectionNode::CleanupTexture() {
     if (textureID) {

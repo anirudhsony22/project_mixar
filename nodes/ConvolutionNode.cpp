@@ -1,6 +1,7 @@
 #include "ConvolutionNode.hpp"
 #include "NodeUI.hpp"
 #include "ImageUtils.hpp"
+#include "SlotUtils.hpp"
 #include <iostream>
 
 ConvolutionNode::ConvolutionNode(const std::string& name)
@@ -20,16 +21,24 @@ void ConvolutionNode::SetInputImages(const std::vector<cv::Mat>& images) {
     }
 }
 
+
 const cv::Mat& ConvolutionNode::GetOutputImage(int) const {
     return outputImage;
 }
 
+
 void ConvolutionNode::Show(smkflow::Graph& graph) {
+    ImGui::SetNextWindowPos(position, ImGuiCond_FirstUseEver);
     if (ImGui::Begin(("Convolution: " + name).c_str())) {
-        DrawInputSlot(name, graph);
+        windowPos = ImGui::GetWindowPos();
+        windowSize = ImGui::GetWindowSize();
+
+        // === Port interactions ===
+        DrawInputPort(*this, 0, graph);
+        DrawOutputPort(*this, 0);
 
         if (hasInput) {
-            // Presets
+            // Preset selection
             const char* presets[] = { "Custom", "Sharpen", "Edge Enhance", "Emboss" };
             if (ImGui::Combo("Preset", &selectedPreset, presets, IM_ARRAYSIZE(presets))) {
                 ApplyPreset(selectedPreset);
@@ -38,7 +47,7 @@ void ConvolutionNode::Show(smkflow::Graph& graph) {
 
             ImGui::Checkbox("Use 5x5 Kernel", &use5x5);
 
-            // Kernel UI
+            // Kernel editor
             int size = use5x5 ? 5 : 3;
             float (*kernelPtr)[5] = use5x5 ? kernel5x5 : (float(*)[5])kernel3x3;
 
@@ -69,11 +78,10 @@ void ConvolutionNode::Show(smkflow::Graph& graph) {
         } else {
             ImGui::Text("No input image.");
         }
-
-        DrawOutputSlot(name, 0);
     }
     ImGui::End();
 }
+
 
 void ConvolutionNode::ApplyPreset(int presetIndex) {
     if (use5x5) {
@@ -117,6 +125,7 @@ void ConvolutionNode::ApplyPreset(int presetIndex) {
     }
 }
 
+
 void ConvolutionNode::UpdateImage() {
     if (!hasInput || inputImage.empty()) return;
 
@@ -129,6 +138,7 @@ void ConvolutionNode::UpdateImage() {
     CreateGLTexture();
     needsUpdate = false;
 }
+
 
 void ConvolutionNode::CreateGLTexture() {
     CleanupTexture();
