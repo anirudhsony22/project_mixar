@@ -25,8 +25,6 @@ void glfw_error_callback(int error, const char* description) {
 int main() {
 
     int inputNodeCounter = 1;
-    int blurNodeCounter = 1;
-    int brightnessNodeCounter = 1;
     int outputNodeCounter = 1;
 
     // Setup GLFW
@@ -56,21 +54,12 @@ int main() {
     smkflow::Graph graph;
 
     auto inputNode = std::make_shared<ImageInputNode>("input");
-    auto blurNode = std::make_shared<BlurNode>("blur");
-    auto bcNode = std::make_shared<BrightnessContrastNode>("brightness");
-    auto outputNode = std::make_shared<OutputNode>("output");
-
-    graph.nodes["input"] = inputNode;
-    graph.nodes["blur"] = blurNode;
-    graph.nodes["brightness"] = bcNode;
-    graph.nodes["output"] = outputNode;
-
+    inputNode->position = ImVec2(100, 100);  // ✅ Set position
 
     std::unordered_map<smkflow::Node*, BaseImageNode*> nodeMap;
-    nodeMap[inputNode.get()] = inputNode.get();
-    nodeMap[blurNode.get()] = blurNode.get();
-    nodeMap[bcNode.get()] = bcNode.get();
-    nodeMap[outputNode.get()] = outputNode.get();
+    graph.nodes["input"] = inputNode;       // ✅ Add to graph
+    nodeMap[inputNode.get()] = inputNode.get(); // ✅ Add to map
+
 
 
     GraphExecutor executor;

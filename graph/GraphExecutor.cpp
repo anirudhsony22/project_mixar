@@ -25,13 +25,19 @@ void GraphExecutor::Evaluate(
         bool hasValidInput = false;
         for (const auto& conn : graph.connections) {
             if (conn.toNodeId == node->name) {
-                auto* fromNode = graph.nodes[conn.fromNodeId].get();
+                auto fromIt = graph.nodes.find(conn.fromNodeId);
+                if (fromIt == graph.nodes.end()) {
+                    std::cerr << "[Evaluate] Warning: fromNode " << conn.fromNodeId << " not found.\n";
+                    continue;
+                }
+        
+                auto* fromNode = fromIt->second.get();
                 if (nodeMap.count(fromNode)) {
                     inputs.push_back(nodeMap[fromNode]->GetOutputImage(conn.fromSlot));
+                    hasValidInput = true;
                 }
             }
-        }        
-
+        }
 
         current->SetInputImages(inputs);
         current->Show(graph); // Renders node & computes output
@@ -53,14 +59,23 @@ std::vector<smkflow::Node*> GraphExecutor::TopologicalSort(
 
     // Build graph edges
     for (const auto& conn : graph.connections) {
-        smkflow::Node* from = graph.nodes.at(conn.fromNodeId).get();
-        smkflow::Node* to = graph.nodes.at(conn.toNodeId).get();
-
+        auto fromIt = graph.nodes.find(conn.fromNodeId);
+        auto toIt = graph.nodes.find(conn.toNodeId);
+    
+        if (fromIt == graph.nodes.end() || toIt == graph.nodes.end()) {
+            std::cerr << "[TopologicalSort] Skipping invalid connection: "
+                      << conn.fromNodeId << " → " << conn.toNodeId << std::endl;
+            continue;
+        }
+    
+        smkflow::Node* from = fromIt->second.get();
+        smkflow::Node* to = toIt->second.get();
+    
         if (nodeMap.count(from) && nodeMap.count(to)) {
             adj[from].push_back(to);
             inDegree[to]++;
         }
-    }
+    }    
 
     // Queue for nodes with no incoming edges
     std::queue<smkflow::Node*> q;
