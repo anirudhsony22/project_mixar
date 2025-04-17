@@ -28,6 +28,10 @@ Contact:
 - asoni@arizona.edu
 - anirudha.psoni@gmail.com
 
+Future Work:
+- Feature to save topology
+- RGB non-grayscale output 
+
 <img width="1281" alt="Screenshot 2025-04-15 at 7 29 29 AM" src="https://github.com/user-attachments/assets/ef3949aa-75ba-496a-8a7a-5c79c5b31351" />
 
 <img width="1281" alt="Screenshot 2025-04-15 at 8 02 24 AM" src="https://github.com/user-attachments/assets/9dbdeebd-8545-4654-ac0e-e16ffd701e07" />
